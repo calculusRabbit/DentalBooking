@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block body %}
+    <h1>DentalTime Appointment System</h1>
+    
+    {% if name %}
+        You are logged in as {{ name }}. <a href="/logout">Log out</a>
+    {% else %}
+        You are not logged in. <a href="/login">Log in</a>
+    {% endif %}
+
+
+
+
+    <ul>
+    <li><a href="/login">Log In</a></li>
+    <li><a href="/register">Register</a></li>
+    <li><a href="/appointments">View Appointments</a></li>
+    </ul>
+
+{% endblock %}
