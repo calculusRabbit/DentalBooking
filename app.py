@@ -155,8 +155,18 @@ def book():
         note = request.form.get("note")
 
         if not clinic_id or not treatment_id or not doctor_id or not date or not time:
+            clinics = cur.execute("SELECT * FROM clinic").fetchall()
+            treatments = cur.execute("SELECT * FROM treatment_name").fetchall()
+            doctors = cur.execute("SELECT person_id, name FROM person WHERE role = 'doctor'").fetchall()
             conn.close()
-            return render_template("book.html", error="missing")
+            return render_template(
+                "book.html", 
+                error="Please fill in all fields.",
+                clinics=clinics,
+                treatments=treatments,
+                doctors=doctors,
+                name=session.get("user_name")
+            )
         
         cur.execute(
             """
@@ -180,8 +190,18 @@ def book():
         exist = cur.fetchone()
 
         if exist:
+            clinics = cur.execute("SELECT * FROM clinic").fetchall()
+            treatments = cur.execute("SELECT * FROM treatment_name").fetchall()
+            doctors = cur.execute("SELECT person_id, name FROM person WHERE role = 'doctor'").fetchall()
             conn.close()
-            return render_template("book.html", error="duplicated book")
+            return render_template(
+                "book.html", 
+                error="This time slot is already booked. Please choose another time.",
+                clinics=clinics,
+                treatments=treatments,
+                doctors=doctors,
+                name=session.get("user_name")
+            )
         
         cur.execute(
             """
@@ -190,17 +210,19 @@ def book():
             """,
             (patient_id, doctor_id, treatment_id, clinic_id, date, time, note)
         )
-        
+        apt_id = cur.lastrowid
+
         conn.commit()
         conn.close()
-        return render_template("/")
+        return redirect(f"/book_confirm?id={apt_id}")
+    
 
 
     # show the booking form
     clinics = cur.execute("SELECT * FROM clinic").fetchall()
     treatments = cur.execute("SELECT * FROM treatment_name").fetchall()
-    doctors = cur.execute("""SELECT person_id, name FROM person WHERE role = 'doctor'""")
-
+    doctors = cur.execute("""SELECT person_id, name FROM person WHERE role = 'doctor'""").fetchall()
+    conn.close()
 
     return render_template(
         "book.html",
@@ -209,3 +231,99 @@ def book():
         doctors=doctors,
         name=session.get("user_name")
         )
+
+
+@app.route("/book_confirm")
+def book_confirm():
+    if not session.get("user_email"):
+        return redirect("/login")
+    
+    
+    appointment_id = request.args.get("id")
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    
+    cur.execute(
+        """
+        SELECT person_id FROM person
+        WHERE user_id = (SELECT user_id FROM user WHERE email = ?)
+        """,
+        (session["user_email"],)
+    )
+    row = cur.fetchone()
+    patient_id = row["person_id"]
+
+    # select everything that like belong to user
+    info = cur.execute(
+        """
+        SELECT 
+            T1.appointment_id,
+            T1.date,
+            T1.time,
+            T1.note,
+            T2.name AS clinic_name,
+            T2.location AS clinic_location,
+            T2.phone AS clinic_phone,
+            T3.name AS treatment_name,
+            T3.cost AS treatment_cost,
+            T4.name AS doctor_name
+        FROM appointment T1
+        INNER JOIN clinic T2 ON T1.clinic_id = T2.clinic_id
+        INNER JOIN treatment_name T3 ON T1.treatment_id = T3.treatment_id
+        INNER JOIN person T4 ON T1.doctor_id = T4.person_id
+        WHERE T1.appointment_id = ? AND T1.patient_id = ?
+        """,
+        (appointment_id, patient_id)
+    ).fetchone()
+
+    if not info:
+        return redirect("/")
+    
+    conn.close()
+    return render_template("book_confirm.html", info=info, name=session.get("user_name"))
+
+
+@app.route("viewAppointment")
+def viewAppointment():
+    if not session.get("user_email"):
+        return redirect("/login")
+    conn = get_db()
+    cur = conn.cursor()
+    
+    
+    row = cur.execute(
+        """
+        SELECT person_id FROM person
+        WHERE user_id = (SELECT user_id FROM user WHERE email = ?)
+        """,
+        (session["user_email"],)
+    ).fetchall
+
+
+    patient_id = row["person_id"]
+    
+
+    appointments = cur.execute(
+        """
+        SELECT 
+            T1.appointment_id,
+            T1.date,
+            T1.time,
+            T1.note,
+            T2.name AS clinic_name,
+            T2.location AS clinic_location,
+            T3.name AS treatment_name,
+            T3.cost AS treatment_cost,
+            T4.name AS doctor_name
+        FROM appointment T1
+        INNER JOIN clinic T2 ON T1.clinic_id = T2.clinic_id
+        INNER JOIN treatment_name T3 ON T1.treatment_id = T3.treatment_id
+        INNER JOIN person T4 ON T1.doctor_id = T4.person_id
+        WHERE T1.patient_id = ?
+        """,
+        (patient_id,)
+    ).fetchall()
+    
+    conn.close()
