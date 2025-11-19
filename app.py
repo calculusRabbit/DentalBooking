@@ -285,7 +285,7 @@ def book_confirm():
     return render_template("book_confirm.html", info=info, name=session.get("user_name"))
 
 
-@app.route("viewAppointment")
+@app.route("/appointments")
 def viewAppointment():
     if not session.get("user_email"):
         return redirect("/login")
@@ -299,12 +299,12 @@ def viewAppointment():
         WHERE user_id = (SELECT user_id FROM user WHERE email = ?)
         """,
         (session["user_email"],)
-    ).fetchall
+    ).fetchone()
 
 
     patient_id = row["person_id"]
     
-
+    # get all infos
     appointments = cur.execute(
         """
         SELECT 
@@ -327,3 +327,5 @@ def viewAppointment():
     ).fetchall()
     
     conn.close()
+
+    return render_template("appointments.html", name=session.get("user_name"), appointments=appointments)
