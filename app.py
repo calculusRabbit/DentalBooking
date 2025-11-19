@@ -136,3 +136,76 @@ def register():
 def logout():
     session.clear()
     return redirect("/")
+
+
+@app.route("/book", methods=["GET", "POST"])
+def book():
+    if not session.get("user_email"):
+        return redirect("/login")
+    
+    conn = get_db()
+    cur = conn.cursor()
+
+    if request.method == "POST":
+        clinic_id = request.form.get("clinic_id")
+        treatment_id = request.form.get("treatment_id")
+        doctor_id = request.form.get("doctor_id")
+        date = request.form.get("date")
+        time = request.form.get("time")
+        note = request.form.get("note")
+
+        if not clinic_id or not treatment_id or not doctor_id or not date or not time:
+            conn.close()
+            return render_template("book.html", error="missing")
+        
+        cur.execute(
+            """
+            SELECT person_id FROM person
+            WHERE user_id = (SELECT user_id FROM user WHERE email = ?)
+            """,
+            (session["user_email"],)
+        )
+        row = cur.fetchone()
+        patient_id = row["person_id"]
+
+
+        # check for duplicate book
+        cur.execute(
+            """
+            SELECT appointment_id FROM appointment
+            WHERE doctor_id = ? AND date = ? AND time = ?
+            """,
+            (doctor_id, date, time)
+        )
+        exist = cur.fetchone()
+
+        if exist:
+            conn.close()
+            return render_template("book.html", error="duplicated book")
+        
+        cur.execute(
+            """
+            INSERT INTO appointment (patient_id, doctor_id, treatment_id, clinic_id, date, time, note)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (patient_id, doctor_id, treatment_id, clinic_id, date, time, note)
+        )
+        
+        conn.commit()
+        conn.close()
+        return render_template("/")
+
+
+    # show the booking form
+    clinics = cur.execute("SELECT * FROM clinic").fetchall()
+    treatments = cur.execute("SELECT * FROM treatment_name").fetchall()
+    doctors = cur.execute("""SELECT person_id, name FROM person WHERE role = 'doctor'""")
+
+
+    return render_template(
+        "book.html",
+        clinics=clinics,
+        treatments=treatments,
+        doctors=doctors,
+        name=session.get("user_name")
+        )
