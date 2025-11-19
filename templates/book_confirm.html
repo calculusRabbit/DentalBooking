@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <h1>✅ Booking Confirmed!</h1>
+
+    <p>Logged in as {{ name }}. <a href="/logout">Log out</a> | <a href="/">Home</a></p>
+
+
+    <h2>Your Appointment Details</h2>
+    <p><strong>Appointment id: #{{ info.appointment_id }}</strong></p>
+
+    <table>
+        <tr>
+            <td><strong>Date:</strong></td>
+            <td>{{ info.date }}</td>
+        </tr>
+        <tr>
+            <td><strong>Time:</strong></td>
+            <td>{{ info.time }}</td>
+        </tr>
+        <tr>
+            <td><strong>Doctor:</strong></td>
+            <td>Dr. {{ info.doctor_name }}</td>
+        </tr>
+        <tr>
+            <td><strong>Treatment:</strong></td>
+            <td>{{ info.treatment_name }}</td>
+        </tr>
+        <tr>
+            <td><strong>Cost:</strong></td>
+            <td>${{ info.treatment_cost }}</td>
+        </tr>
+        <tr>
+            <td><strong>Clinic:</strong></td>
+            <td>{{ info.clinic_name }}</td>
+        </tr>
+        <tr>
+            <td><strong>Location:</strong></td>
+            <td>{{ info.clinic_location }}</td>
+        </tr>
+        <tr>
+            <td><strong>Clinic Phone:</strong></td>
+            <td>{{ info.clinic_phone }}</td>
+        </tr>
+        <tr>
+            <td><strong>Notes:</strong></td>
+            <td>{{ info.note }}</td>
+        </tr>
+    </table>
+
+    <br>
+    <br>
+
+    <ul>
+        <li><a href="/appointments">View All My Appointments</a></li>
+        <li><a href="/book">ook Another Appointment</a></li>
+        <li><a href="/">Back to Home</a></li>
+    </ul>
+
+{% endblock %}
