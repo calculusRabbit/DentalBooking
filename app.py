@@ -183,9 +183,9 @@ def book():
         cur.execute(
             """
             SELECT appointment_id FROM appointment
-            WHERE doctor_id = ? AND date = ? AND time = ?
+            WHERE date = ? AND time = ?
             """,
-            (doctor_id, date, time)
+            (date, time)
         )
         exist = cur.fetchone()
 
@@ -329,3 +329,162 @@ def viewAppointment():
     conn.close()
 
     return render_template("appointments.html", name=session.get("user_name"), appointments=appointments)
+
+
+@app.route("/edit", methods=["GET", "POST"])
+def edit():
+    if not session.get("user_email"):
+        return redirect("/login")
+    
+    appointment_id = request.args.get("id")
+    
+    if not appointment_id:
+        return redirect("/appointments")
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    cur.execute(
+        """
+        SELECT person_id FROM person
+        WHERE user_id = (SELECT user_id FROM user WHERE email = ?)
+        """,
+        (session["user_email"],)
+    )
+    row = cur.fetchone()
+    patient_id = row["person_id"]
+    
+    if request.method == "POST":
+        clinic_id = request.form.get("clinic_id")
+        treatment_id = request.form.get("treatment_id")
+
+        doctor_id = request.form.get("doctor_id")
+        date = request.form.get("date")
+        time = request.form.get("time")
+        note = request.form.get("note")
+
+        clinics = cur.execute("SELECT * FROM clinic").fetchall()
+        treatments = cur.execute("SELECT * FROM treatment_name").fetchall()
+        doctors = cur.execute("SELECT person_id, name FROM person WHERE role = 'doctor'").fetchall()
+
+        appointment = cur.execute(
+            """
+            SELECT * FROM appointment
+            WHERE appointment_id = ?
+            """,
+            (appointment_id)
+        ).fetchone()
+        
+        
+        if not clinic_id or not treatment_id or not doctor_id or not date or not time:
+            
+            conn.close()
+            return render_template(
+                "edit.html",
+                error="Please fill in all fields.",
+                clinics=clinics,
+                treatments=treatments,
+                doctors=doctors,
+                appointment=appointment,
+                name=session.get("user_name")
+            )
+        
+        # duplicated
+        cur.execute(
+            """
+            SELECT appointment_id FROM appointment
+            WHERE doctor_id = ? AND date = ? AND time = ? AND appointment_id != ?
+            """,
+            (doctor_id, date, time, appointment_id)
+        )
+        exist = cur.fetchone()
+        
+        if exist:    
+            conn.close()
+            return render_template(
+                "edit.html",
+                error="This time slot is already booked. Please choose another time.",
+                clinics=clinics,
+                treatments=treatments,
+                doctors=doctors,
+                appointment=appointment,
+                name=session.get("user_name")
+            )
+        
+        # Update the appointment
+        cur.execute(
+            """
+            UPDATE appointment
+            SET clinic_id = ?, treatment_id = ?, doctor_id = ?, date = ?, time = ?, note = ?
+            WHERE appointment_id = ? AND patient_id = ?
+            """,
+            (clinic_id, treatment_id, doctor_id, date, time, note, appointment_id, patient_id)
+        )
+        
+        conn.commit()
+        conn.close()
+        
+        return redirect("/appointments")
+    
+
+    appointment = cur.execute(
+        """
+        SELECT * FROM appointment
+        WHERE appointment_id = ?
+        """,
+        (appointment_id)
+    ).fetchone()
+    
+    clinics = cur.execute("SELECT * FROM clinic").fetchall()
+    treatments = cur.execute("SELECT * FROM treatment_name").fetchall()
+    doctors = cur.execute("SELECT person_id, name FROM person WHERE role = 'doctor'").fetchall()
+    
+    conn.close()
+    
+    return render_template(
+        "edit.html",
+        appointment=appointment,
+        clinics=clinics,
+        treatments=treatments,
+        doctors=doctors,
+        name=session.get("user_name")
+    )
+
+
+@app.route("/cancel")
+def cancel():
+    if not session.get("user_email"):
+        return redirect("/login")
+    
+    appointment_id = request.args.get("id")
+    
+    if not appointment_id:
+        return redirect("/appointments")
+    
+    conn = get_db()
+    cur = conn.cursor()
+    
+    
+    cur.execute(
+        """
+        SELECT person_id FROM person
+        WHERE user_id = (SELECT user_id FROM user WHERE email = ?)
+        """,
+        (session["user_email"],)
+    )
+    row = cur.fetchone()
+    patient_id = row["person_id"]
+    
+    # Delete the appointment)
+    cur.execute(
+        """
+        DELETE FROM appointment
+        WHERE appointment_id = ? AND patient_id = ?
+        """,
+        (appointment_id, patient_id)
+    )
+    
+    conn.commit()
+    conn.close()
+    
+    return redirect("/appointments?cancelled=1")

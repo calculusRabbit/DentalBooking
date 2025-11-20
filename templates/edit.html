@@ -1,0 +1,68 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+<h1>Edit Appointment</h1>
+
+<p>Logged in as {{ name }}. <a href="/logout">Log out</a> | <a href="/">Home</a> | <a href="/appointments">View My Appointments</a></p>
+
+{% if error %}
+    <p><strong>{{ error }}</strong></p>
+{% endif %}
+
+<form action="/edit?id={{ appointment.appointment_id }}" method="post">
+    
+    Select Clinic:
+    <select name="clinic_id" required>
+        <option disabled value="">Select clinic place</option>
+        {% for clinic in clinics %}
+            <option value="{{ clinic.clinic_id }}" 
+                {% if clinic.clinic_id == appointment.clinic_id %}selected{% endif %}>
+                {{ clinic.name }} ({{ clinic.location }})
+            </option>
+        {% endfor %}
+    </select>
+    <br><br>
+
+    Select Treatment:
+    <select name="treatment_id" required>
+        <option disabled value="">Select treatment</option>
+        {% for treatment in treatments %}
+            <option value="{{ treatment.treatment_id }}"
+                {% if treatment.treatment_id == appointment.treatment_id %}selected{% endif %}>
+                {{ treatment.name }} - ${{ treatment.cost }}
+            </option>
+        {% endfor %}
+    </select>
+    <br><br>
+
+    Select Doctor:
+    <select name="doctor_id" required>
+        <option disabled value="">Select doctor</option>
+        {% for doctor in doctors %}
+            <option value="{{ doctor.person_id }}"
+                {% if doctor.person_id == appointment.doctor_id %}selected{% endif %}>
+                Dr. {{ doctor.name }}
+            </option>
+        {% endfor %}
+    </select>
+    <br><br>
+
+    Appointment Date:
+    <input type="date" name="date" value="{{ appointment.date }}" required>
+    <br><br>
+
+    Appointment Time:
+    <input type="time" name="time" value="{{ appointment.time }}" required>
+    <br><br>
+
+    Notes (optional):
+    <textarea name="note" rows="3" placeholder="Any special requests or information...">{{ appointment.note }}</textarea>
+    <br><br>
+
+    <button type="submit">Update Appointment</button>
+    <a href="/appointments">Cancel</a>
+
+</form>
+
+{% endblock %}
