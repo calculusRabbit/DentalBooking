@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session
 from flask_session import Session
+from werkzeug.utils import secure_filename
 import sqlite3
 
 
@@ -8,6 +9,9 @@ app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+UPLOAD_FOLDER = 'static/avatars'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 db = "dental.db"
 def get_db():
@@ -117,10 +121,10 @@ def register():
 
         cur.execute(
             """
-            INSERT INTO person (user_id, name, dob, gender, phone, ssn, address, role)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO person (user_id, name, dob, gender, phone, ssn, address, role, avatar)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (user_id, name, dob, gender, phone, ssn, address, "patient")
+            (user_id, name, dob, gender, phone, ssn, address, "patient", "default-avatar.png")
         )
 
         conn.commit()
@@ -488,3 +492,60 @@ def cancel():
     conn.close()
     
     return redirect("/appointments?cancelled=1")
+
+
+@app.route("/profile", methods=["GET", "POST"])
+def profile():
+    if not session.get("user_email"):
+        return redirect("/login")
+    
+    conn = get_db()
+    cur = conn.cursor()
+
+    row = cur.execute(
+        "SELECT user_id FROM user WHERE email = ?",
+        (session["user_email"],)
+    ).fetchone()
+    user_id = row["user_id"]
+
+    if request.method == "POST":
+        action = request.form.get("action")
+
+        if action == "upload_avatar":
+            img = request.files['avatar']
+            if img.filename == '':
+                person = cur.execute("SELECT * FROM person WHERE user_id = ?", (user_id,)).fetchone()
+                conn.close()
+                return render_template("profile.html", person=person, error="No file selected", name=session.get("user_name"))
+
+            filename = f"avatar_{user_id}.jpg"
+            filepath = f"static/avatars/{filename}"
+            with open(filepath, 'wb') as f:
+                f.write(img.read())
+
+            
+        elif action == "update_property":
+            property = request.form.get("property")
+            value = request.form.get("value")
+
+            if not value:
+                person = cur.execute("SELECT * FROM person WHERE user_id = ?", (user_id,)).fetchone()
+                conn.close()
+                return render_template("profile.html", person=person, error="enter input", name=session.get("user_name"))
+
+            cur.execute(f"UPDATE person SET {property} = ? WHERE user_id = ?", (value, user_id))
+            
+            
+            conn.commit()
+            conn.close()
+
+            if property == 'name':
+                session["user_name"] = value
+            
+            return redirect("/profile?info_updated=1")
+    
+    person = cur.execute("SELECT * FROM person WHERE user_id = ?", (user_id,)).fetchone()
+    conn.close()
+    return render_template("profile.html", person=person, name=session.get("user_name"))
+
+            
