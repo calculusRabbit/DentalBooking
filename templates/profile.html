@@ -25,9 +25,9 @@
 
     <h2>Profile pictture</h2>
     {% if person.avatar %}
-        <img src="/static/avatars/{{ person.avatar }}">
+        <img src="/static/images/{{ person.avatar }}">
     {% else %}
-        <img src="/static/avatars/default-avatar.png">
+        <img src="/static/images/default-avatar.jpg">
     {% endif %}
     <br><br>
     <form action="/profile" method="post" enctype="multipart/form-data">
@@ -86,14 +86,14 @@
     </div>
 
 
-    <div id="adressView">
-        <strong>Adress: </strong>{{ person.adress }}
-        <button onclick="editProperty('adress')">Edit</button>
+    <div id="addressView">
+        <strong>Address: </strong>{{ person.address }}
+        <button onclick="editProperty('address')">Edit</button>
     </div>
-    <div id="adressEdit" style="display: none;">
+    <div id="addressEdit" style="display: none;">
         <form action="/profile" method="post">
             <input type="hidden" name="action" value="update_property">
-            <input type="hidden" name="property" value="adress">
+            <input type="hidden" name="property" value="address">
             <strong>Address: </strong>
             <input type="text" name="value" value="{{ person.address }}">
             <button type="submit">Save</button>
@@ -102,15 +102,15 @@
     </div>
 
     <div id="passwordView">
-        <strong>Password: </strong>{{ person.password }}
+        <strong>Password: </strong>{{ password }}
         <button onclick="editProperty('password')">Edit</button>
     </div>
     <div id="passwordEdit" style="display: none;">
         <form action="/profile" method="post">
-            <input type="hidden" name="action" value="update_property">
+            <input type="hidden" name="action" value="update_password">
             <input type="hidden" name="property" value="password">
             <strong>password: </strong>
-            <input type="password" name="value" value="{{ person.password }}">
+            <input type="password" name="value" value="{{ password }}">
             <button type="submit">Save</button>
             <button type="button" onclick="cancelEdit('password')">Cancel</button>
         </form>
