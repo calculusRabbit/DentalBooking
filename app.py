@@ -73,49 +73,34 @@ def login():
 def register():
 
     if request.method == "POST":
-        name    = request.form.get("name")
-        dob     = request.form.get("dob")
-        gender  = request.form.get("gender")
-        email   = request.form.get("email")
-        phone   = request.form.get("phone")
-        pw      = request.form.get("password")
-        ssn     = request.form.get("ssn")
-        address = request.form.get("address")
+        arr = ["name", "dob", "gender", "email", "phone", "password", "ssn", "address"]
+        data = {}
+        for prop in arr:
+            data[prop] = request.form.get(prop)
 
-        if not name or not dob or not gender or not email or not phone or not pw:
-            return render_template(
-                "register.html",
-                error="Please tester, dont try to break system."
-            )
+        for value in data.values():
+            if not value:
+                return render_template("register.html", error="Please tester, dont try to break system.")
 
         conn = get_db()
         cur = conn.cursor()
 
-        cur.execute("SELECT email FROM user WHERE email = ?", (email,))
+        cur.execute("SELECT email FROM user WHERE email = ?", (data["email"],))
         existing = cur.fetchone()
         if existing:
             conn.close()
             return render_template("register.html", error="Email is already registered.")
         
-        cur.execute("SELECT phone FROM person WHERE phone = ?", (phone,))
+        cur.execute("SELECT phone FROM person WHERE phone = ?", (data["phone"],))
         existing = cur.fetchone()
         if existing:
             conn.close()
             return render_template("register.html", error="Phone is already registered.")
 
-        cur.execute(
-            "INSERT INTO user (email, password) VALUES (?, ?)",
-            (email, pw)
-        )
+        cur.execute("INSERT INTO user (email, password) VALUES (?, ?)", (data["email"], data["password"]))
         
 
-        cur.execute("""
-            SELECT user_id
-            FROM user
-            WHERE email = ?
-            """, 
-            (email,)
-        )
+        cur.execute("SELECT user_id FROM user WHERE email = ?", (data["email"],))
         row = cur.fetchone()
         user_id = row["user_id"]
 
@@ -124,7 +109,7 @@ def register():
             INSERT INTO person (user_id, name, dob, gender, phone, ssn, address, role, avatar)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (user_id, name, dob, gender, phone, ssn, address, "patient", "default-avatar.jpg")
+            (user_id, data["name"], data["dob"], data["gender"], data["phone"], data["ssn"], data["address"], "patient", "default-avatar.jpg")
         )
 
         conn.commit()
@@ -335,126 +320,6 @@ def viewAppointment():
     return render_template("appointments.html", name=session.get("user_name"), appointments=appointments)
 
 
-@app.route("/edit", methods=["GET", "POST"])
-def edit():
-    if not session.get("user_email"):
-        return redirect("/login")
-    
-    appointment_id = request.args.get("id")
-    
-    if not appointment_id:
-        return redirect("/appointments")
-    
-    conn = get_db()
-    cur = conn.cursor()
-    
-    cur.execute(
-        """
-        SELECT person_id FROM person
-        WHERE user_id = (SELECT user_id FROM user WHERE email = ?)
-        """,
-        (session["user_email"],)
-    )
-    row = cur.fetchone()
-    patient_id = row["person_id"]
-    
-    if request.method == "POST":
-        clinic_id = request.form.get("clinic_id")
-        treatment_id = request.form.get("treatment_id")
-
-        doctor_id = request.form.get("doctor_id")
-        date = request.form.get("date")
-        time = request.form.get("time")
-        note = request.form.get("note")
-
-        clinics = cur.execute("SELECT * FROM clinic").fetchall()
-        treatments = cur.execute("SELECT * FROM treatment_name").fetchall()
-        doctors = cur.execute("SELECT person_id, name FROM person WHERE role = 'doctor'").fetchall()
-
-        appointment = cur.execute(
-            """
-            SELECT * FROM appointment
-            WHERE appointment_id = ?
-            """,
-            (appointment_id)
-        ).fetchone()
-        
-        
-        if not clinic_id or not treatment_id or not doctor_id or not date or not time:
-            
-            conn.close()
-            return render_template(
-                "edit.html",
-                error="Please fill in all fields.",
-                clinics=clinics,
-                treatments=treatments,
-                doctors=doctors,
-                appointment=appointment,
-                name=session.get("user_name")
-            )
-        
-        # duplicated
-        cur.execute(
-            """
-            SELECT appointment_id FROM appointment
-            WHERE doctor_id = ? AND date = ? AND time = ? AND appointment_id != ?
-            """,
-            (doctor_id, date, time, appointment_id)
-        )
-        exist = cur.fetchone()
-        
-        if exist:    
-            conn.close()
-            return render_template(
-                "edit.html",
-                error="This time slot is already booked. Please choose another time.",
-                clinics=clinics,
-                treatments=treatments,
-                doctors=doctors,
-                appointment=appointment,
-                name=session.get("user_name")
-            )
-        
-        # Update the appointment
-        cur.execute(
-            """
-            UPDATE appointment
-            SET clinic_id = ?, treatment_id = ?, doctor_id = ?, date = ?, time = ?, note = ?
-            WHERE appointment_id = ? AND patient_id = ?
-            """,
-            (clinic_id, treatment_id, doctor_id, date, time, note, appointment_id, patient_id)
-        )
-        
-        conn.commit()
-        conn.close()
-        
-        return redirect("/appointments")
-    
-
-    appointment = cur.execute(
-        """
-        SELECT * FROM appointment
-        WHERE appointment_id = ?
-        """,
-        (appointment_id)
-    ).fetchone()
-    
-    clinics = cur.execute("SELECT * FROM clinic").fetchall()
-    treatments = cur.execute("SELECT * FROM treatment_name").fetchall()
-    doctors = cur.execute("SELECT person_id, name FROM person WHERE role = 'doctor'").fetchall()
-    
-    conn.close()
-    
-    return render_template(
-        "edit.html",
-        appointment=appointment,
-        clinics=clinics,
-        treatments=treatments,
-        doctors=doctors,
-        name=session.get("user_name")
-    )
-
-
 @app.route("/cancel")
 def cancel():
     if not session.get("user_email"):
@@ -491,7 +356,7 @@ def cancel():
     conn.commit()
     conn.close()
     
-    return redirect("/appointments?cancelled=1")
+    return redirect("/appointments?cancelled=yes")
 
 
 @app.route("/profile", methods=["GET", "POST"])
@@ -520,6 +385,7 @@ def profile():
             img = request.files['avatar']
             if img.filename == '':
                 person = cur.execute("SELECT * FROM person WHERE user_id = ?", (user_id,)).fetchone()
+                conn.close()
                 return render_template("profile.html", person=person, error="No file selected", name=session.get("user_name"), password=pw)
 
             filename = f"avatar_{user_id}.jpg"
@@ -530,6 +396,8 @@ def profile():
             cur.execute("UPDATE person SET avatar = ? WHERE user_id = ?", (filename, user_id))
             conn.commit()
             conn.close()
+
+            return redirect("/profile?avatar_updated=yes") 
 
             
         elif action == "update_property":
@@ -543,14 +411,14 @@ def profile():
 
             cur.execute(f"UPDATE person SET {property} = ? WHERE user_id = ?", (value, user_id))
             
-            
+        
             conn.commit()
             conn.close()
 
             if property == 'name':
                 session["user_name"] = value
             
-            return redirect("/profile?info_updated=1")
+            return redirect("/profile?info_updated=yes")
         
         elif action == "update_password":
             property = request.form.get("property")
@@ -568,4 +436,27 @@ def profile():
     conn.close()
     return render_template("profile.html", person=person, name=session.get("user_name"), password=pw)
 
-            
+
+@app.route("/debug")
+def debug():
+    conn = get_db()
+    cur = conn.cursor()
+    
+    users = cur.execute("SELECT * FROM user").fetchall()
+    persons = cur.execute("SELECT * FROM person").fetchall()
+    clinics = cur.execute("SELECT * FROM clinic").fetchall()
+    treatments = cur.execute("SELECT * FROM treatment_name").fetchall()
+    appointments = cur.execute("SELECT * FROM appointment").fetchall()
+    treatment_type = cur.execute("SELECT * FROM treatment_type").fetchall()
+    
+    tables = [
+        {"name": "user", "data": users},
+        {"name": "person", "data": persons},
+        {"name": "clinic", "data": clinics},
+        {"name": "treatment_name", "data": treatments},
+        {"name": "appointment", "data": appointments},
+        {"name": "treatment_type", "data": treatment_type}
+    ]
+    
+    conn.close()
+    return render_template("debug.html", tables=tables)

@@ -1,31 +1,48 @@
 {% extends "layout.html" %}
 
 {% block body %}
+    <style>
+        .container {
+            max-width: 800;
+            margin: 0 auto;
+        }
+        .login-box {
+            background-color: white;
+            padding: 20px;
+            border: 1px solid gray;
+            text-align: center;
+        }
+    </style>
+    <div class="container">
+        <div class="login-box">
+            <h1>Log In</h1>
 
-    <h1>Log In</h1>
+            {% if error %}
+                {{ error }}
+            {% endif %}
 
-    {% if error %}
-        {{ error }}
-    {% endif %}
+            <form action="/login" method="post">
 
-    <form action="/login" method="post">
+                <input
+                    autocomplete="off"
+                    autofocus
+                    name="email"
+                    placeholder="Email"
+                    type="email"
+                    required>
 
-        <input
-            autocomplete="off"
-            autofocus
-            name="email"
-            placeholder="Email"
-            type="email"
-            required>
+                <input
+                    name="password"
+                    placeholder="Password"
+                    type="password"
+                    required>
 
-        <input
-            name="password"
-            placeholder="Password"
-            type="password"
-            required>
+                <button type="submit" style="background-color: cornflowerblue; padding: 10px 25px">Log In</button>
+            </form>
 
-        <button type="submit">Log In</button>
-
-    </form>
+            <a href="/register" style="margin-right: 20px">Register</a>
+            <a href="/">Back to Home</a>
+        </div>
+    </div>
 
 {% endblock %}

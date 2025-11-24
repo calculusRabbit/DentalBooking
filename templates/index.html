@@ -1,23 +1,84 @@
 {% extends "layout.html" %}
 
 {% block body %}
-    <h1>DentalTime Appointment System</h1>
+
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .welcome-box {
+        background: azure;
+        padding: 20px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+        .link-box {
+        text-align: center;
+        background: white;
+        padding: 20px;
+        border: 1px solid gray;
+        margin-bottom: 15px;
+    }
     
-    {% if name %}
-        You are logged in as {{ name }}. <a href="/logout">Log out</a>
-    {% else %}
-        You are not logged in. <a href="/login">Log in</a>
-    {% endif %}
+    .link-box a {
+        text-align: center;
+        background: cornflowerblue;
+        display: inline-block;
+        padding: 10px 25px;
+        color: white;
+    }
 
 
+    </style>
+    
 
+    <div class="container">
+        <div class="welcome-box">
+            <h1>DentailTime Appointment App</h1>
+            {% if name %}
+                <p style="font-size: 21px;">Welcome back {{ name }}</p>
+                <a href="/logout">Log Out</a>
+            {% else %}
+                <p>You have not log in, please go log in</p>
+                <a href="/login">Log In</a>
+            {% endif %}
+        </div>
 
-    <ul>
-    <li><a href="/login">Log In</a></li>
-    <li><a href="/register">Register</a></li>
-    <li><a href="/appointments">View Appointments</a></li>
-    <li><a href="/book">make appointment</a></li>
-    <li><a href="/profile">account</a></li>
-    </ul>
+        {% if name %}
+            <div class="link-box">
+            <h3>Book Appointment</h3>
+            <p>Schedule a new visit</p>
+            <a href="/book">Book</a>
+        </div>
+        
+        <div class="link-box">
+            <h3>My Appointments</h3>
+            <p>View all appointments</p>
+            <a href="/appointments">View/Cancel</a>
+        </div>
+        
+        <div class="link-box">
+            <h3>My Profile</h3>
+            <p>Update information</p>
+            <a href="/profile">Edit</a>
+        </div>
+
+        {% else %}
+            <div class="link-box">
+                <h3>Log In</h3>
+                <p>Access your account</p>
+                <a href="/login">Log In</a>
+            </div>
+            
+            <div class="link-box">
+                <h3>Register</h3>
+                <p>Create new account</p>
+                <a href="/register">Sign Up</a>
+            </div>
+        {% endif %}
+    </div>
 
 {% endblock %}

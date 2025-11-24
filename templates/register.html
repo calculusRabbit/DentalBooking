@@ -1,60 +1,78 @@
 {% extends "layout.html" %}
 
 {% block body %}
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .box {
+            background: white;
+            padding: 20px;
+            border: 1px solid gray;
+            text-align: center;
+        }
+    </style>
 
-    <h1>Create Your Account</h1>
+    <div class="container">
+        <div class="box">
+            <h1>Create Your Account</h1>
 
-    <form action="/register" method="post">
+            <form action="/register" method="post">
 
-        <input autocomplete="off" name="name" type="text" placeholder="Full Name" required>
-        <br>
-        <br>
+                <input autocomplete="off" name="name" type="text" placeholder="Full Name" required>
+                <br>
+                <br>
 
-        <input autocomplete="off" name="dob" type="date" required>
-        <br>
-        <br>
+                <input autocomplete="off" name="dob" type="date" required>
+                <br>
+                <br>
 
-        Gender:
-        <label><input type="radio" name="gender" value="male" required>Male</label>
-        <label><input type="radio" name="gender" value="female">Female</label>
-        <label><input type="radio" name="gender" value="other">Other</label>
-        <br>
-        <br>
+                Gender:
+                <label><input type="radio" name="gender" value="male" required>Male</label>
+                <label><input type="radio" name="gender" value="female">Female</label>
+                <label><input type="radio" name="gender" value="other">Other</label>
+                <br>
+                <br>
 
-        <input autocomplete="off" name="email" type="email" placeholder="Email address" required>
-        <br>
-        <br>
+                <input autocomplete="off" name="email" type="email" placeholder="Email address" required>
+                <br>
+                <br>
 
-        <input autocomplete="off" name="phone" type="tel" placeholder="Phone (123-456-7890)" required>
-        <br>
-        <br>
+                <input autocomplete="off" name="phone" type="tel" placeholder="Phone (123-456-7890)" required>
+                <br>
+                <br>
 
-        <input autocomplete="off" name="ssn" type="text" placeholder="SSN" pattern="[0-9]{10}">
-        <br>
-        <br>
+                <input autocomplete="off" name="ssn" type="text" placeholder="SSN" pattern="[0-9]{10}">
+                <br>
+                <br>
 
-        <textarea name="address" placeholder="Address"></textarea>
-        <br>
-        <br>
+                <textarea name="address" placeholder="Address"></textarea>
+                <br>
+                <br>
 
-        <input name="password" type="password" placeholder="Create password" required>
-        <br>
-        <br>
+                <input name="password" type="password" placeholder="Create password" required>
+                <br>
+                <br>
 
-        <select name="role">
-            <option value="patient" selected>Patient</option>
-            <option value="doctor">Doctor (staff only)</option>
-            <option value="nurse">Nurse (staff only)</option>
-        </select>
-        <br>
-        <br>
+                <select name="role">
+                    <option value="patient" selected>Patient</option>
+                    <option value="doctor">Doctor (staff only)</option>
+                    <option value="nurse">Nurse (staff only)</option>
+                </select>
+                <br>
+                <br>
 
-        <button type="submit">Register</button>
+                <button type="submit" style="background-color: cornflowerblue; padding: 10px 25px">Register</button>
 
-        {% if error %}
-            {{ error }}
-        {% endif %}
+                {% if error %}
+                    {{ error }}
+                {% endif %}
 
-    </form>
+            </form>
+        </div>
+    </div>
+
 
 {% endblock %}

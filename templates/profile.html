@@ -2,118 +2,163 @@
 
 {% block body %}
 
-    <h1>My Profile</h1>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
 
-    <p>Logged in as {{ name }}. <a href="/logout">Log out</a> | <a href="/">Home</a> | <a href="/appointments">My Appointments</a></p>
+        .box {
+            background: azure;
+            padding: 20px;
+            text-align: center;
+        }
 
-    {% if error %}
-        <p><strong>{{ error }}</strong></p>
-    {% endif %}
+        img {
+            max-width: 80px;
+            margin: 10px 0;
+        }
 
-    {% if request.args.get('avatar_updated') %}
-        <p><strong>Avatar updated</strong></p>
-    {% endif %}
+        p {
+            padding: 15px 0;
+        }
 
-    {% if request.args.get('info_updated') %}
-        <p><strong>Profile updated</strong></p>
-    {% endif %}
+        a {
+            color: cornflowerblue;
+            margin: 0 10px;
+        }
 
-    {% if request.args.get('password_updated') %}
-        <p><strong>Password updated</strong></p>
-    {% endif %}
+        button {
+            background: cornflowerblue;
+            color: white;
+            padding: 8px 20px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
 
-
-    <h2>Profile pictture</h2>
-    {% if person.avatar %}
-        <img src="/static/images/{{ person.avatar }}">
-    {% else %}
-        <img src="/static/images/default-avatar.jpg">
-    {% endif %}
-    <br><br>
-    <form action="/profile" method="post" enctype="multipart/form-data">
-        <input type="hidden" name="action" value="upload_avatar">
-        <input type="file" name="avatar" accept="image/*" required>
-        <button type="submit">Upload New Avatar</button>
-    </form>
+        input {
+            padding: 8px;
+            margin: 0 10px;
+        }
 
 
-    <h2>Personal info</h2>
-    <div id ="nameView">
-        <strong>Name: </strong> {{ person.name}}
-        <button onclick="editProperty('name')">Edit</button>
-    </div>
-    <div id="nameEdit" style="display: none;">
-        <form action="/profile" method="post">
-            <input type="hidden" name="action" value="update_property">
-            <input type="hidden" name="property" value="name">
-            <strong>Name:</strong>
-            <input type="text" name="value" value="{{ person.name }}">
-            <button type="submit">Save</button>
-            <button type="button" onclick="cancelEdit('name')">Cancel</button>
+    </style>
+
+    <div class="container">
+        <div class="box">
+            <h1>My Profile</h1>
+
+            <p>Logged in as {{ name }}. <a href="/logout">Log out</a> | <a href="/">Home</a> | <a href="/appointments">My Appointments</a></p>
+        </div>
+        {% if error %}
+            <p><strong>{{ error }}</strong></p>
+        {% endif %}
+
+        {% if request.args.get('avatar_updated') %}
+            <p><strong>Avatar updated</strong></p>
+        {% endif %}
+
+        {% if request.args.get('info_updated') %}
+            <p><strong>Profile updated</strong></p>
+        {% endif %}
+
+        {% if request.args.get('password_updated') %}
+            <p><strong>Password updated</strong></p>
+        {% endif %}
+
+
+        <h2>Profile pictture</h2>
+        {% if person.avatar %}
+            <img src="/static/images/{{ person.avatar }}">
+        {% else %}
+            <img src="/static/images/default-avatar.jpg">
+        {% endif %}
+        <br><br>
+        <form action="/profile" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="upload_avatar">
+            <input type="file" name="avatar" accept="image/*" required>
+            <button type="submit">Upload New Avatar</button>
         </form>
-    </div>
 
 
-    <div id="phoneView">
-        <strong>PPhone: </strong>{{ person.phone }}
-        <button onclick="editProperty('phone')">Edit</button>
-    </div>
-    <div id="phoneEdit" style="display: none;">
-        <form action="/profile" method="post">
-            <input type="hidden" name="action" value="update_property">
-            <input type="hidden" name="property" value="phone">
-            <strong>Phone: </strong>
-            <input type="tel" name="value" value="{{ person.phone }}">
-            <button type="submit">Save</button>
-            <button type="button" onclick="cancelEdit('phone')">Cancel</button>
-        </form>
-    </div>
+        <h2>Personal info</h2>
+        <div id ="nameView">
+            <strong>Name: </strong> {{ person.name}}
+            <button onclick="editProperty('name')">Edit</button>
+        </div>
+        <div id="nameEdit" style="display: none;">
+            <form action="/profile" method="post">
+                <input type="hidden" name="action" value="update_property">
+                <input type="hidden" name="property" value="name">
+                <strong>Name:</strong>
+                <input type="text" name="value" value="{{ person.name }}">
+                <button type="submit">Save</button>
+                <button type="button" onclick="cancelEdit('name')">Cancel</button>
+            </form>
+        </div>
 
 
-    <div id="dobView">
-        <strong>Birth day: </strong>{{ person.dob }}
-        <button onclick="editProperty('dob')">Edit</button>
-    </div>
-    <div id="dobEdit" style="display: none;">
-        <form action="/profile" method="post">
-            <input type="hidden" name="action" value="update_property">
-            <input type="hidden" name="property" value="dob">
-            <strong>Birth day: </strong>
-            <input type="date" name="value" value="{{ person.dob }}">
-            <button type="submit">Save</button>
-            <button type="button" onclick="cancelEdit('dob')">Cancel</button>
-        </form>
-    </div>
+        <div id="phoneView">
+            <strong>Phone: </strong>{{ person.phone }}
+            <button onclick="editProperty('phone')">Edit</button>
+        </div>
+        <div id="phoneEdit" style="display: none;">
+            <form action="/profile" method="post">
+                <input type="hidden" name="action" value="update_property">
+                <input type="hidden" name="property" value="phone">
+                <strong>Phone: </strong>
+                <input type="tel" name="value" value="{{ person.phone }}">
+                <button type="submit">Save</button>
+                <button type="button" onclick="cancelEdit('phone')">Cancel</button>
+            </form>
+        </div>
 
 
-    <div id="addressView">
-        <strong>Address: </strong>{{ person.address }}
-        <button onclick="editProperty('address')">Edit</button>
-    </div>
-    <div id="addressEdit" style="display: none;">
-        <form action="/profile" method="post">
-            <input type="hidden" name="action" value="update_property">
-            <input type="hidden" name="property" value="address">
-            <strong>Address: </strong>
-            <input type="text" name="value" value="{{ person.address }}">
-            <button type="submit">Save</button>
-            <button type="button" onclick="cancelEdit('address')">Cancel</button>
-        </form>
-    </div>
+        <div id="dobView">
+            <strong>Birth day: </strong>{{ person.dob }}
+            <button onclick="editProperty('dob')">Edit</button>
+        </div>
+        <div id="dobEdit" style="display: none;">
+            <form action="/profile" method="post">
+                <input type="hidden" name="action" value="update_property">
+                <input type="hidden" name="property" value="dob">
+                <strong>Birth day: </strong>
+                <input type="date" name="value" value="{{ person.dob }}">
+                <button type="submit">Save</button>
+                <button type="button" onclick="cancelEdit('dob')">Cancel</button>
+            </form>
+        </div>
 
-    <div id="passwordView">
-        <strong>Password: </strong>{{ password }}
-        <button onclick="editProperty('password')">Edit</button>
-    </div>
-    <div id="passwordEdit" style="display: none;">
-        <form action="/profile" method="post">
-            <input type="hidden" name="action" value="update_password">
-            <input type="hidden" name="property" value="password">
-            <strong>password: </strong>
-            <input type="password" name="value" value="{{ password }}">
-            <button type="submit">Save</button>
-            <button type="button" onclick="cancelEdit('password')">Cancel</button>
-        </form>
+
+        <div id="addressView">
+            <strong>Address: </strong>{{ person.address }}
+            <button onclick="editProperty('address')">Edit</button>
+        </div>
+        <div id="addressEdit" style="display: none;">
+            <form action="/profile" method="post">
+                <input type="hidden" name="action" value="update_property">
+                <input type="hidden" name="property" value="address">
+                <strong>Address: </strong>
+                <input type="text" name="value" value="{{ person.address }}">
+                <button type="submit">Save</button>
+                <button type="button" onclick="cancelEdit('address')">Cancel</button>
+            </form>
+        </div>
+
+        <div id="passwordView">
+            <strong>Password: </strong>{{ password }}
+            <button onclick="editProperty('password')">Edit</button>
+        </div>
+        <div id="passwordEdit" style="display: none;">
+            <form action="/profile" method="post">
+                <input type="hidden" name="action" value="update_password">
+                <input type="hidden" name="property" value="password">
+                <strong>password: </strong>
+                <input type="password" name="value" value="{{ password }}">
+                <button type="submit">Save</button>
+                <button type="button" onclick="cancelEdit('password')">Cancel</button>
+            </form>
+        </div>
     </div>
 
 

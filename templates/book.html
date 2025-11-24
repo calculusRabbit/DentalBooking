@@ -2,57 +2,79 @@
 
 {% block body %}
 
-    <h1>Book an Appointment</h1>
-
-    <p>Logged in as {{ name }}. <a href="/logout">Log out</a> | <a href="/">Home</a> | <a href="/appointments">View My Appointments</a></p>
-
-    {% if error %}
-        <p style="color: red;"><strong>{{ error }}</strong></p>
-    {% endif %}
-
-    <form action="/book" method="post">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
         
-        Select Clinic:
-        <select name="clinic_id" required>
-            <option disabled selected value="">Select clinic place</option>
-            {% for clinic in clinics %}
-                <option value="{{ clinic.clinic_id }}">{{ clinic.name }} ({{ clinic.location }})</option>
-            {% endfor %}
-        </select>
-        <br><br>
+        .box {
+            background: azure;
+            padding: 20px;
+            text-align: center;
+        }
 
-        Select Treatment:
-        <select name="treatment_id" required>
-            <option disabled selected value="">Select treatment</option>
-            {% for treatment in treatments %}
-                <option value="{{ treatment.treatment_id }}">{{ treatment.name }} - ${{ treatment.cost }}</option>
-            {% endfor %}
-        </select>
-        <br><br>
+        
+        
+    </style>
 
-        Select Doctor:
-        <select name="doctor_id" required>
-            <option disabled selected value="">Select doctor</option>
-            {% for doctor in doctors %}
-                <option value="{{ doctor.person_id }}">Dr. {{ doctor.name }}</option>
-            {% endfor %}
-        </select>
-        <br><br>
+    <div class="container">
+        <div class="box">
+            <h1>Book an Appointment</h1>
 
-        Appointment Date:
-        <input type="date" name="date" required>
-        <br><br>
+            <p style="font-size: 25px;">Logged in as {{ name }}. <a href="/logout">Log out</a> | <a href="/">Home</a> | <a href="/appointments">View My Appointments</a></p>
+        </div>
 
-        Appointment Time:
-        <input type="time" name="time" required>
-        <br><br>
+            <h1>Booking appointment</h1>
 
-        Notes (optional):
-        <textarea name="note" rows="3" placeholder="Any special requests or information..."></textarea>
-        <br><br>
+            {% if error %}
+                <p style="color: red;"><strong>{{ error }}</strong></p>
+            {% endif %}
 
-        <button type="submit">Book Appointment</button>
+            <form action="/book" method="post">
+                
+                Select Clinic:
+                <select name="clinic_id" required>
+                    <option disabled selected value="">Select clinic place</option>
+                    {% for clinic in clinics %}
+                        <option value="{{ clinic.clinic_id }}">{{ clinic.name }} ({{ clinic.location }})</option>
+                    {% endfor %}
+                </select>
+                <br><br>
 
-    </form>
+                Select Treatment:
+                <select name="treatment_id" required>
+                    <option disabled selected value="">Select treatment</option>
+                    {% for treatment in treatments %}
+                        <option value="{{ treatment.treatment_id }}">{{ treatment.name }} - ${{ treatment.cost }}</option>
+                    {% endfor %}
+                </select>
+                <br><br>
+
+                Select Doctor:
+                <select name="doctor_id" required>
+                    <option disabled selected value="">Select doctor</option>
+                    {% for doctor in doctors %}
+                        <option value="{{ doctor.person_id }}">Dr. {{ doctor.name }}</option>
+                    {% endfor %}
+                </select>
+                <br><br>
+
+                Appointment Date:
+                <input type="date" name="date" required>
+                <br><br>
+
+                Appointment Time:
+                <input type="time" name="time" required>
+                <br><br>
+
+                Notes (optional):
+                <textarea name="note" rows="3" placeholder="Any special requests or information..."></textarea>
+                <br><br>
+
+                <button type="submit">Book Appointment</button>
+
+            </form>
+    </div>
 
 {% endblock %}

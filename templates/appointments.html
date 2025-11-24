@@ -1,49 +1,93 @@
 {% extends "layout.html" %}
 
 {% block body %}
+    <style>
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
 
-    <h1>My Appointments</h1>
+        .box {
+        background: azure;
+        text-align: center;
+        padding: 20px;
+        margin-bottom: 20px;
+        }
 
-    <p>Logged in as {{ name }}. <a href="/logout">Log out</a> | <a href="/">Home</a> | <a href="/book">book appointment</a></p>
+        .box a {
+        color: cornflowerblue;
+        margin: 0 10px;
+        }
 
-    {% if appointments %}
-        <h2>Your all appointments:</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Clinic</th>
-                <th>Location</th>
-                <th>Treatment</th>
-                <th>Cost</th>
-                <th>Doctor</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-            <tbody>
-                {% for apt in appointments %}
-                <tr>
-                    <td>{{ apt.date }}</td>
-                    <td>{{ apt.time }}</td>
-                    <td>{{ apt.clinic_name }}</td>
-                    <td>{{ apt.clinic_location }}</td>
-                    <td>{{ apt.treatment_name }}</td>
-                    <td>${{ apt.treatment_cost }}</td>
-                    <td>Dr. {{ apt.doctor_name }}</td>
-                    <td>
-                        <a href="/edit?id={{ apt.appointment_id }}">Edit</a>
-                        <a href="/cancel?id={{ apt.appointment_id }}" 
-                        onclick="return confirm('Are you sure you want to cancel this appointment?')">Cancel</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        table {
+        background: white;
+        width: 100%;
+        padding: 20px;
+        }
 
-    {% else %}
-        <p>You have no appointments</p>
-        <p><a href="/book">Book your first appointment</a></p>
-    {% endif %}
+        th {
+        background: cornflowerblue;
+        color: white;
+        padding: 12px;
+        text-align: left;
+        }
+
+        td {
+        padding: 12px;
+        white-space: nowrap;
+        }
+
+        td a {
+        color: cornflowerblue;
+        }
+    </style>
+
+    <div class="container">
+        <div class="box">
+            <h1>My Appointments</h1>
+
+            <p style="font-size: 26px;">Logged in as {{ name }}. <a href="/logout">Log Out</a> | <a href="/">Home</a> | <a href="/book">Book Appointment</a></p>
+        </div>
+            {% if appointments %}
+                <h2>Your all appointments:</h2>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Clinic</th>
+                        <th>Location</th>
+                        <th>Treatment</th>
+                        <th>Cost</th>
+                        <th>Doctor</th>
+                        <th>Note</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                    <tbody>
+                        {% for apt in appointments %}
+                        <tr>
+                            <td>{{ apt.date }}</td>
+                            <td>{{ apt.time }}</td>
+                            <td>{{ apt.clinic_name }}</td>
+                            <td>{{ apt.clinic_location }}</td>
+                            <td>{{ apt.treatment_name }}</td>
+                            <td>${{ apt.treatment_cost }}</td>
+                            <td>Dr. {{ apt.doctor_name }}</td>
+                            <td>{{ apt.note }}</td>
+                            <td>
+                                <a href="/cancel?id={{ apt.appointment_id }}" 
+                                onclick="return confirm('Are you sure you want to cancel this appointment?')">Cancel</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            {% else %}
+                <p>You have no appointments</p>
+                <p><a href="/book">Book your first appointment</a></p>
+            {% endif %}
+    </div>
 
 {% endblock %}

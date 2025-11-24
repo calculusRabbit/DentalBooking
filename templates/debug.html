@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block body %}
+    <h1>Database Debug</h1>
+    <p><a href="/">Home</a></p>
+
+    {% for table in tables %}
+        <h3>{{ table.name }}</h3>
+        <table border="1">
+            <tr>
+                {% for key in table.data[0].keys() %}
+                    <th>{{ key }}</th>
+                {% endfor %}
+            </tr>
+            {% for row in table.data %}
+                <tr>
+                    {% for key in row.keys() %}
+                        <td>{{ row[key] }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+    {% endfor %}
+
+{% endblock %}
